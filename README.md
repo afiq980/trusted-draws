@@ -17,6 +17,13 @@ A way to create trust between organisers and participants of lucky draws and lot
    npm start
    ```
 
+## Testing
+
+Run the built-in regression suite before adding new features:
+```bash
+npm test
+```
+
 ## MVP Phase 1
 
 - Draw creation and management

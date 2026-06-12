@@ -5,20 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Results for <%= draw.title %></title>
 </head>
-<body>
-  <h1>Results for <%= draw.title %></h1>
-  <p>Status: <%= draw.status %></p>
-  <% if (!results.length) { %>
-    <p>No results available yet.</p>
-  <% } else { %>
-    <ul>
-      <% results.forEach(result => { %>
-        <li>
-          Position <%= result.position %>: <%= result.winner_hash.substring(0, 16) %>...<br />
-          Selected at: <%= new Date(result.selected_at).toLocaleString() %>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <div class="app-container">
+    <div class="card">
+      <h1>Results for <%= draw.title %></h1>
+      <p class="muted">Status: <%= draw.status %></p>
+      <% if (!results.length) { %>
+        <p>No results available yet.</p>
+      <% } else { %>
+        <ul>
+          <% results.forEach(result => { %>
+            <li>
+              <strong>Position <%= result.position %></strong>: <%= result.winner_hash.substring(0, 16) %>...<br />
+              <span class="muted">Selected at: <%= new Date(result.selected_at).toLocaleString() %></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  </div>
 </body>
 </html>

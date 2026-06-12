@@ -4,20 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= draw.title %></title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <h1><%= draw.title %></h1>
-  <p><%= draw.description %></p>
-  <p>Organizer: <%= draw.organizer_name || 'Anonymous' %></p>
-  <p>Entries: <%= entryCount %></p>
-  <% if (typeof message !== 'undefined' && message) { %>
-    <p><strong><%= message %></strong></p>
-  <% } %>
-  <form action="/submit/<%= draw.public_id %>" method="post">
-    <label>Entry<br><input type="text" name="entryText" required /></label><br />
-    <button type="submit">Submit Entry</button>
-  </form>
-  <p><a href="/verify/<%= draw.public_id %>">Verify your entry</a></p>
-  <p><a href="/draw/<%= draw.public_id %>/results">View hashed results</a></p>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <div class="app-container">
+    <div class="card">
+      <div class="top-meta">
+        <h1><%= draw.title %></h1>
+        <span class="muted">Entries: <strong><%= entryCount %></strong></span>
+      </div>
+      <p><%= draw.description %></p>
+      <p class="muted">Organizer: <%= draw.organizer_name || 'Anonymous' %></p>
+      <% if (typeof message !== 'undefined' && message) { %>
+        <p><strong><%= message %></strong></p>
+      <% } %>
+      <form action="/submit/<%= draw.public_id %>" method="post">
+        <label>Entry
+          <input type="text" name="entryText" required />
+        </label>
+        <div style="margin-top:12px">
+          <button class="btn btn-primary" type="submit">Submit Entry</button>
+        </div>
+      </form>
+      <div style="margin-top:12px">
+        <a class="btn btn-secondary" href="/verify/<%= draw.public_id %>">Verify your entry</a>
+        <a class="muted" style="margin-left:12px" href="/draw/<%= draw.public_id %>/results">View hashed results</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

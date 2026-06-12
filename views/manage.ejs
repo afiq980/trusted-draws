@@ -5,29 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Draw</title>
 </head>
-<body>
-  <h1>Manage Draw: <%= draw.title %></h1>
-  <p>Status: <%= draw.status %></p>
-  <% if (message) { %>
-    <p><strong><%= message %></strong></p>
-  <% } %>
-  <h2>Entries</h2>
-  <ul>
-    <% entries.forEach(entry => { %>
-      <li><%= entry.entry_text %> — <%= new Date(entry.created_at).toLocaleString() %></li>
-    <% }) %>
-  </ul>
-  <form action="/draw/<%= draw.admin_token %>/execute" method="post">
-    <button type="submit" <% if (draw.status !== 'open') { %>disabled<% } %>>Execute Draw</button>
-  </form>
-  <form action="/draw/<%= draw.admin_token %>/publish" method="post">
-    <button type="submit" <% if (draw.status !== 'drawn') { %>disabled<% } %>>Publish Results</button>
-  </form>
-  <h2>Results</h2>
-  <ul>
-    <% results.forEach(result => { %>
-      <li>Position <%= result.position %>: <%= result.winner_hash.substring(0, 16) %>...</li>
-    <% }) %>
-  </ul>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app">
+  <div class="app-container">
+    <div class="card">
+      <div class="top-meta">
+        <h1>Manage Draw: <%= draw.title %></h1>
+        <span class="status-pill"><%= draw.status %></span>
+      </div>
+      <% if (message) { %>
+        <p><strong><%= message %></strong></p>
+      <% } %>
+      <h2>Entries</h2>
+      <ul>
+        <% entries.forEach(entry => { %>
+          <li><%= entry.entry_text %> — <%= new Date(entry.created_at).toLocaleString() %></li>
+        <% }) %>
+      </ul>
+      <div style="display:flex;gap:12px;margin-top:12px">
+        <form action="/draw/<%= draw.admin_token %>/execute" method="post">
+          <button class="btn btn-primary" type="submit" <% if (draw.status !== 'open') { %>disabled<% } %>>Execute Draw</button>
+        </form>
+        <form action="/draw/<%= draw.admin_token %>/publish" method="post">
+          <button class="btn btn-secondary" type="submit" <% if (draw.status !== 'drawn') { %>disabled<% } %>>Publish Results</button>
+        </form>
+      </div>
+      <h2 style="margin-top:18px">Results</h2>
+      <ul>
+        <% results.forEach(result => { %>
+          <li>Position <%= result.position %>: <%= result.winner_hash.substring(0, 16) %>...</li>
+        <% }) %>
+      </ul>
+    </div>
+  </div>
 </body>
 </html>

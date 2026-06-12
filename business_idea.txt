@@ -1,0 +1,424 @@
+# Verified Draws Platform - Specification
+
+## 1. PRODUCT VISION
+
+**Platform Name:** [Your Platform Name]
+
+**Tagline:** "Transparent, Verifiable, Private Lottery & Giveaway Platform"
+
+**Core Value Proposition:**
+A web platform that enables organizations, influencers, and communities to conduct fair, transparent lottery draws/giveaways with cryptographic verification and privacy-first design. Eliminates trust barriers by making draws verifiable without exposing participant data.
+
+**Primary Use Cases:**
+- Influencer giveaways and contests
+- Company employee/customer drawings
+- Community raffles and sweepstakes
+- Gaming tournaments (prize drawings)
+- Charity fundraiser drawings
+- Educational institution draws
+
+---
+
+## 2. TECHNICAL ARCHITECTURE
+
+### 2.1 URL Structure
+
+**Public Draw URL (Shareable):**
+```
+https://yourdomain.com/draw/{publicId}
+Example: https://yourdomain.com/draw/abc-def-ghi-1a2b3c
+```
+
+**Admin Management URL (Secret):**
+```
+https://yourdomain.com/manage/{adminToken}
+Example: https://yourdomain.com/manage/def-ghi-jkl-4d5e6f
+```
+
+**Verification URL (For Participants):**
+```
+https://yourdomain.com/verify/{publicId}
+```
+
+### 2.2 Draw ID Generation
+
+- **publicId:** 20-character alphanumeric string (URL-safe). Used in shareable links.
+- **adminToken:** 32-character cryptographic token. Kept secret, controls draw management.
+- **verificationKey:** SHA-256 hash derived from publicId (used for entry hashing).
+
+---
+
+## 3. CORE FEATURES
+
+### 3.1 Draw Creation & Configuration
+
+**Organizer creates a draw with:**
+
+1. **Basic Information:**
+   - Draw title (max 200 words)
+   - Description/Rules (HTML markup supported, max 5000 chars)
+   - Cover image (JPEG/PNG, optimized to <5MB)
+   - Brand logo (PNG/SVG, max 2MB)
+   - Organizer name/contact (email)
+
+2. **Draw Configuration:**
+   - **Entry Format:** Username, email, phone, custom ID, or free text entry
+   - **Entry Uniqueness Rule:** Enforce unique entries or allow duplicates
+   - **Draw Scope:** Random single draw vs. multiple draws from same pool
+   - **Number of Winners:** 1 to 1000+
+   - **Weighted Draws:** Optional - each entry can have different weight/odds (e.g., "VIP" entries have 2x odds)
+   - **Drawing Method:**
+     - Simple random draw
+     - Stratified random (e.g., 50% from group A, 50% from group B)
+
+3. **Timeline:**
+   - Entry submission start date/time
+   - Entry submission end date/time (after which no new entries accepted)
+   - Scheduled draw date/time (can be overridden by organizer)
+   - Publish results immediately or schedule publication
+
+4. **Privacy & Verification:**
+   - Participant verification runs client-side where possible
+   - Auto-hash all entries on publication
+   - Entry data encrypted at rest by default (AES-256-GCM), decrypted only on admin screen or when organizer exports
+
+5. **Accessibility Settings:**
+   - Language selection (default: English)
+   - Accessibility mode (high contrast, larger fonts)
+
+**Output on Creation:**
+- Public shareable link
+- Admin management link + one-time PIN displayed to organizer (NOT stored in system, lost after page refresh)
+- QR code for public link
+- Embed code for website integration
+
+---
+
+### 3.2 Entry Submission System
+
+**Public Draw Page Features:**
+
+1. **Entry Submission Form:**
+   - Single input field (or multiple fields based on entry format)
+   - Real-time validation (e.g., email format check)
+   - Duplicate detection with user-friendly message ("You've already entered")
+   - Rate limiting: Max 10 entries per IP per minute (to prevent spam)
+   - CAPTCHA option (configurable by organizer)
+
+2. **Page Display:**
+   - Themed, professional layout with organizer's branding
+   - Live entry count (updated real-time via WebSocket)
+   - Time remaining until entry closes (countdown timer)
+   - Draw scheduled time (with disclaimer: "Final draw time may be adjusted by organizer")
+   - Social sharing buttons (Twitter, Facebook, LinkedIn, WhatsApp)
+   - Copy-to-clipboard for link
+   - Previous draws widget (if organizer has history)
+
+3. **Data Collection:**
+   - Collect entry data
+   - Optional: Collect participant email for result notification
+   - Optional: Collect participant consent for newsletter/marketing (if organizer wants)
+   - Timestamp each entry
+   - IP address logged (not shown publicly)
+
+---
+
+### 3.3 Draw Execution
+
+**Admin Controls:**
+
+1. **Pre-Draw:**
+   - View total entry count
+   - See all entries (unhashed, plain text)
+   - Option to manually remove entries (with audit log)
+   - Pause/reopen entry submission anytime before draw time
+   - Preview draw logic (dry-run)
+
+2. **Draw Execution:**
+   - Click "Execute Draw" button
+   - System displays confirmation: "Draw cannot be undone or re-attempted"
+   - Draw is generated using cryptographically secure randomness (e.g., Web Crypto API or server-side RNG)
+   - Results locked immediately - no manual editing
+
+3. **Post-Draw:**
+   - Download results as CSV (unhashed entries with positions)
+   - Screenshot results (tracked in audit log)
+   - View audit log of all admin actions
+   - Mark results as published/unpublished (affects public visibility)
+
+---
+
+### 3.4 Results Publication & Display
+
+**Public Results Page (publicId/results):**
+
+1. **Published Results Show:**
+   - List of winners numbered 1 to N
+   - HASHED entry identifiers only (not original entries)
+   - Draw timestamp
+   - Draw methodology summary ("Random selection from X entries")
+   - Organizer name & branding
+
+2. **Hash Function:**
+   - Algorithm: BLAKE2b (or SHA-256) 
+   - Input: Original entry + verificationKey derived from publicId
+   - Output: 16-character hex hash (e.g., "a1b2c3d4e5f6g7h8")
+   - Hash is deterministic: Same entry always produces same hash
+   - Collision-resistant: Practically impossible to find two entries with same hash
+
+3. **Transparency:**
+   - Display hashing methodology on results page
+   - Link to documentation explaining verification process
+
+---
+
+### 3.5 Participant Self-Verification
+
+**Verification Feature (yourdomain.com/verify/{publicId}):**
+
+1. **Participant Flow:**
+   - Enter their original entry (e.g., "john@example.com")
+   - System hashes it using same algorithm & verificationKey
+   - System searches results for matching hash
+   - Display results:
+     - ✓ "Found! You won position #3" OR
+     - ✗ "Not found in winners" OR
+     - ℹ "Draw not published yet"
+
+2. **Privacy Protection:**
+   - No audit trail of who verified (no server logs of searches)
+   - Verification happens client-side when possible
+   - Rate limiting on verification API (100 per minute per IP)
+
+---
+
+## 4. SECURITY & PRIVACY
+
+### 4.1 Data Security
+
+1. **Encryption:**
+   - All data encrypted in transit (TLS 1.3+)
+   - Entry data encrypted at rest (AES-256-GCM)
+   - Encryption key managed via environment variables / secrets manager
+
+2. **Admin Authentication:**
+   - Secure token-based auth (JWT or opaque tokens)
+   - Admin token expires 30 days from creation
+   - One-time PIN shown only once at draw creation, never stored
+   - Admin action audit log (all operations timestamped with admin IP)
+
+3. **Access Control:**
+   - Public draw page: No authentication needed
+   - Admin panel: Requires valid adminToken
+   - Verification page: No authentication needed
+
+### 4.2 Privacy by Design
+
+1. **Data Minimization:**
+   - Store only necessary data (entries, metadata, timestamps)
+   - No tracking pixels or third-party analytics
+   - No cookies except session/functional cookies
+   - No email stored unless organizer explicitly collects it
+
+2. **Data Retention:**
+   - Raw entries deleted 90 days after draw completion (configurable)
+   - Hashed results retained for 1 year (for audit)
+   - Option for organizer to request full data deletion anytime
+
+3. **GDPR Compliance:**
+   - Data processing agreement available
+   - Right to access/export personal data
+   - Right to deletion (except audit logs)
+   - Privacy policy clearly displayed
+   - Consent explicit before any data collection
+
+---
+
+## 5. USER ROLES & WORKFLOWS
+
+### 5.1 Organizer (Draw Creator)
+
+**Workflow:**
+1. Sign up / login (optional - can create draws anonymously)
+2. Click "Create Draw"
+3. Configure draw settings
+4. Share public link via social/email
+5. Monitor entries real-time
+6. Execute draw at scheduled time
+7. Download/view results
+8. Share results with audience
+9. Archive draw
+
+**Dashboard Features:**
+- List of all created draws (active, completed, archived)
+- Quick stats (total entries, winner count, etc.)
+- Create new draw button
+- View draw history
+
+### 5.2 Participant
+
+**Workflow:**
+1. Click shared link or scan QR code
+2. View draw details & rules
+3. Submit entry (single field)
+4. See confirmation message
+5. Optionally: opt-in for result notification email
+6. Later: Check verification page to see if they won
+
+### 5.3 Admin (Platform Admin - Internal)
+
+**Workflow:**
+- Monitor platform health
+- Manage abuse reports
+- View aggregate statistics
+- Send notifications to organizers
+- Access system logs
+
+---
+
+## 6. PHASED ROADMAP
+
+### Phase 1: MVP (Weeks 1-4)
+- [x] Core draw creation & management
+- [x] Entry submission system
+- [x] Basic draw execution (random selection)
+- [x] Hashed results display
+- [x] Participant verification
+- [x] Simple admin panel (no authentication initially)
+- [x] Basic UI (functional, not polished)
+
+### Phase 2: Security & Polish (Weeks 5-8)
+- [ ] Implement JWT authentication for admins
+- [ ] One-time PIN system
+- [ ] Audit logging
+- [ ] Encryption at rest
+- [ ] GDPR compliance framework
+- [ ] Professional UI/UX design
+- [ ] Mobile responsiveness
+- [ ] Email notifications
+
+### Phase 3: Advanced Features (Weeks 9-12)
+- [ ] Weighted draws
+- [ ] Stratified draws
+- [ ] Organizer accounts & dashboard
+- [ ] Customizable email templates
+- [ ] Analytics dashboard
+- [ ] API for programmatic draw creation
+- [ ] Embed widget for websites
+
+### Phase 4: Monetization & Scale (Weeks 13+)
+- [ ] Premium features (custom domain, advanced analytics, etc.)
+- [ ] Payment processing (Stripe)
+- [ ] Subscription tiers
+- [ ] White-label option
+- [ ] High-volume load testing & optimization
+
+---
+
+## 7. BUSINESS MODEL
+
+### Revenue Streams
+
+1. **Free Tier:**
+   - Unlimited free draws
+   - Up to 1000 entries per draw
+   - Basic features
+   - Platform branding required
+
+2. **Premium Tier ($10/month):**
+   - Unlimited entries
+   - Remove platform branding
+   - Advanced analytics
+
+
+### Target Market
+
+- Influencers & content creators (Instagram, TikTok, YouTube)
+- Marketing agencies running campaigns
+- Corporate HR departments
+- E-commerce businesses
+- Non-profits & charities
+- Gaming communities
+
+---
+
+## 8. TECHNICAL STACK RECOMMENDATIONS
+
+### Platform Stack
+- **Hosting / Frontend / Backend:** Vercel (Next.js serverless functions)
+- **Database / Auth / Storage:** Supabase
+- **Database:** PostgreSQL via Supabase
+- **Auth:** Supabase Auth for secure management links and organizer sessionless flows
+- **Realtime:** Supabase Realtime for live entry counters and draw status updates
+- **Storage:** Supabase Storage for cover images and logos
+- **Payments:** Stripe single payment links integrated via Supabase edge functions or Vercel serverless functions
+
+### Frontend
+- **Framework:** Next.js
+- **Styling:** Tailwind CSS
+- **Forms:** React Hook Form for validation and submission
+- **Data Fetching:** Supabase client and Next.js API routes
+
+### Backend / Serverless
+- **Serverless Functions:** Vercel Edge or Serverless Functions for draw execution, verification, and admin management
+- **Database:** Supabase Postgres with row-level security and encrypted fields
+- **Encryption:** AES-256-GCM for sensitive entry data, managed via Supabase secrets or Vercel environment variables
+
+### Monitoring & Operations
+- **Monitoring:** Vercel analytics and Supabase logs
+- **Logging:** Supabase Audit Logs for draw and export actions
+- **Environment:** Vercel preview and production deployments
+
+### Security & Cryptography
+- **Hashing:** SHA-256 or BLAKE2b for draw verification hashes
+- **Auth:** Supabase Auth tokens for management access and secure draw links
+- **Rate Limiting:** Built into Vercel edge functions or via Supabase RPC middleware
+- **CORS:** Configure for the project domain and Vercel deployment
+
+---
+
+## 9. LEGAL & COMPLIANCE
+
+### Regulatory Considerations
+
+1. **Gambling Laws:**
+   - Platform is NOT a gambling platform (no money exchanged for entries)
+   - However, check local laws regarding sweepstakes/contests
+   - Ensure Terms of Service clearly state no gambling
+
+2. **GDPR (EU):**
+   - Data Processing Agreement
+   - Privacy policy
+   - Right to be forgotten
+   - Consent tracking
+
+3. **CCPA (California):**
+   - Privacy policy
+   - Consumer rights disclosure
+   - Opt-out mechanism
+
+4. **Terms of Service:**
+   - Clear rules against manipulation
+   - Liability limitations
+   - Dispute resolution mechanism
+   - Content moderation policy
+
+
+
+## 10. DEVELOPMENT PRIORITIES FOR AI AGENT
+
+### Must-Have (Critical Path)
+1. Database schema for draws, entries, results
+2. Draw creation API endpoint
+3. Entry submission form & API
+4. Draw execution algorithm (cryptographic randomness)
+5. Hash & verification logic
+6. Admin management page
+
+### Should-Have (Next Priority)
+1. Pagination for large entry lists
+2. Admin authentication (token-based for management links)
+3. Audit logging
+4. Results download (CSV/JSON)
+
+
