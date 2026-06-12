@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Results for <%= draw.title %></title>
+</head>
+<body>
+  <h1>Results for <%= draw.title %></h1>
+  <p>Status: <%= draw.status %></p>
+  <% if (!results.length) { %>
+    <p>No results available yet.</p>
+  <% } else { %>
+    <ul>
+      <% results.forEach(result => { %>
+        <li>
+          Position <%= result.position %>: <%= result.winner_hash.substring(0, 16) %>...<br />
+          Selected at: <%= new Date(result.selected_at).toLocaleString() %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trusted Draws</title>
+</head>
+<body>
+  <h1>Trusted Draws</h1>
+  <p>Create a new lottery or giveaway draw.</p>
+  <form action="/draw" method="post">
+    <label>Title<br><input type="text" name="title" required /></label><br />
+    <label>Description<br><textarea name="description"></textarea></label><br />
+    <label>Organizer name<br><input type="text" name="organizerName" /></label><br />
+    <label>Organizer email<br><input type="email" name="organizerEmail" /></label><br />
+    <label>Entry format<br>
+      <select name="entryFormat">
+        <option value="username">Username</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
+        <option value="custom">Custom ID</option>
+        <option value="free-text">Free text</option>
+      </select>
+    </label><br />
+    <button type="submit">Create Draw</button>
+  </form>
+</body>
+</html>

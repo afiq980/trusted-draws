@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= draw.title %></title>
+</head>
+<body>
+  <h1><%= draw.title %></h1>
+  <p><%= draw.description %></p>
+  <p>Organizer: <%= draw.organizer_name || 'Anonymous' %></p>
+  <p>Entries: <%= entryCount %></p>
+  <% if (typeof message !== 'undefined' && message) { %>
+    <p><strong><%= message %></strong></p>
+  <% } %>
+  <form action="/submit/<%= draw.public_id %>" method="post">
+    <label>Entry<br><input type="text" name="entryText" required /></label><br />
+    <button type="submit">Submit Entry</button>
+  </form>
+  <p><a href="/verify/<%= draw.public_id %>">Verify your entry</a></p>
+  <p><a href="/draw/<%= draw.public_id %>/results">View hashed results</a></p>
+</body>
+</html>

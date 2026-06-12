@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Entry</title>
+</head>
+<body>
+  <h1>Verify entry for <%= draw.title %></h1>
+  <form action="/verify/<%= draw.public_id %>" method="post">
+    <label>Your original entry<br><input type="text" name="entryText" required /></label><br />
+    <button type="submit">Verify</button>
+  </form>
+  <% if (result) { %>
+    <% if (result.winner) { %>
+      <p>Congratulations! You won position #<%= result.position %>.</p>
+    <% } else { %>
+      <p>Not found in winners.</p>
+    <% } %>
+  <% } %>
+</body>
+</html>

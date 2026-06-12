@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Draw</title>
+</head>
+<body>
+  <h1>Manage Draw: <%= draw.title %></h1>
+  <p>Status: <%= draw.status %></p>
+  <% if (message) { %>
+    <p><strong><%= message %></strong></p>
+  <% } %>
+  <h2>Entries</h2>
+  <ul>
+    <% entries.forEach(entry => { %>
+      <li><%= entry.entry_text %> — <%= new Date(entry.created_at).toLocaleString() %></li>
+    <% }) %>
+  </ul>
+  <form action="/draw/<%= draw.admin_token %>/execute" method="post">
+    <button type="submit" <% if (draw.status !== 'open') { %>disabled<% } %>>Execute Draw</button>
+  </form>
+  <form action="/draw/<%= draw.admin_token %>/publish" method="post">
+    <button type="submit" <% if (draw.status !== 'drawn') { %>disabled<% } %>>Publish Results</button>
+  </form>
+  <h2>Results</h2>
+  <ul>
+    <% results.forEach(result => { %>
+      <li>Position <%= result.position %>: <%= result.winner_hash.substring(0, 16) %>...</li>
+    <% }) %>
+  </ul>
+</body>
+</html>
